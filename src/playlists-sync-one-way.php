@@ -13,7 +13,7 @@
 
 \define('CONFIG_PATH_RELATIVE', '../data/config.json');
 \define('DATABASE_PATH_RELATIVE', '../data/database.json');
-\define('SPOTIFY_API_SCOPES', 'playlist-modify-public playlist-modify-private');
+\define('SPOTIFY_API_SCOPES', 'playlist-modify-public playlist-modify-private user-library-read');
 \define('SPOTIFY_URI_PLAYLIST_REGEX', '/^spotify:user:([^:]+):playlist:([^:]+)$/');
 
 $config = \readConfig(\CONFIG_PATH_RELATIVE);
