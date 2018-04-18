@@ -15,6 +15,7 @@
 \define('DATABASE_PATH_RELATIVE', '../data/database.json');
 \define('SPOTIFY_API_SCOPES', 'playlist-modify-public playlist-modify-private user-library-read');
 \define('SPOTIFY_URI_PLAYLIST_REGEX', '/^spotify:user:([^:]+):playlist:([^:]+)$/');
+\define('SAVED_TRACKS_PSEUDO_PLAYLIST_URI', 'me:tracks');
 
 $config = \readConfig(\CONFIG_PATH_RELATIVE);
 $database = \readDatabase(\DATABASE_PATH_RELATIVE);
@@ -46,7 +47,11 @@ if (isset($_GET['code'])) {
 
 				$filterByYear = (isset($oneWaySync['filterByYear']) && \is_array($oneWaySync['filterByYear']) && !empty($oneWaySync['filterByYear'])) ? $oneWaySync['filterByYear'] : null;
 
-				if (\preg_match(\SPOTIFY_URI_PLAYLIST_REGEX, $oneWaySync['from'], $oneWaySyncFrom)) {
+				if (\preg_match(\SPOTIFY_URI_PLAYLIST_REGEX, $oneWaySync['from'], $oneWaySyncFrom) || $oneWaySync['from'] === \SAVED_TRACKS_PSEUDO_PLAYLIST_URI) {
+					if ($oneWaySync['from'] === \SAVED_TRACKS_PSEUDO_PLAYLIST_URI) {
+						$oneWaySyncFrom = [ null, null, null ];
+					}
+
 					if (\preg_match(\SPOTIFY_URI_PLAYLIST_REGEX, $oneWaySync['to'], $oneWaySyncTo)) {
 						$trackUris = \fetchTrackUrisFromPlaylist(
 							$database['auth']['accessToken'],
