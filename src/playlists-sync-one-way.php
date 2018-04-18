@@ -172,9 +172,11 @@ function fetchTrackUrisFromPlaylist($accessToken, $ownerName, $id, $offset = nul
 			$limit = isset($response['limit']) ? (int) $response['limit'] : null;
 			$total = isset($response['total']) ? (int) $response['total'] : null;
 
+			$tracks = $response['items'];
+
 			$trackUris = \array_map(function ($each) {
 				return $each['track']['uri'];
-			}, $response['items']);
+			}, $tracks);
 
 			if (($offset + $limit) < $total) {
 				$trackUris = \array_merge(
