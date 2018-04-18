@@ -168,9 +168,11 @@ function fetchTrackUrisFromPlaylist($accessToken, $ownerName, $id, $offset = nul
 		$response = \json_decode($responseJson, true);
 
 		if ($response !== false && isset($response['items'])) {
-			return \array_map(function ($each) {
+			$trackUris = \array_map(function ($each) {
 				return $each['track']['uri'];
 			}, $response['items']);
+
+			return $trackUris;
 		}
 		else {
 			return null;
