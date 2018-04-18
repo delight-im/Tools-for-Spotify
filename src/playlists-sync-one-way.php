@@ -44,12 +44,16 @@ if (isset($_GET['code'])) {
 			if (isset($oneWaySync['from']) && isset($oneWaySync['to'])) {
 				echo '   * From "' . $oneWaySync['from'] . '" to "' . $oneWaySync['to'] . '" ...' . "\n";
 
+				$filterByYear = (isset($oneWaySync['filterByYear']) && \is_array($oneWaySync['filterByYear']) && !empty($oneWaySync['filterByYear'])) ? $oneWaySync['filterByYear'] : null;
+
 				if (\preg_match(\SPOTIFY_URI_PLAYLIST_REGEX, $oneWaySync['from'], $oneWaySyncFrom)) {
 					if (\preg_match(\SPOTIFY_URI_PLAYLIST_REGEX, $oneWaySync['to'], $oneWaySyncTo)) {
 						$trackUris = \fetchTrackUrisFromPlaylist(
 							$database['auth']['accessToken'],
 							$oneWaySyncFrom[1],
-							$oneWaySyncFrom[2]
+							$oneWaySyncFrom[2],
+							null,
+							$filterByYear
 						);
 
 						if ($trackUris !== null) {
@@ -153,12 +157,12 @@ function saveTrackUrisToPlaylist($accessToken, $ownerName, $id, array $uris) {
 	}
 }
 
-function fetchTrackUrisFromPlaylist($accessToken, $ownerName, $id, $offset = null) {
+function fetchTrackUrisFromPlaylist($accessToken, $ownerName, $id, $offset = null, $filterByYear = null) {
 	$offset = isset($offset) ? (int) $offset : 0;
 
 	$responseJson = makeHttpRequest(
 		'GET',
-		'https://api.spotify.com/v1/users/' . \urlencode($ownerName) . '/playlists/' . \urlencode($id) . '/tracks?offset=' . $offset . '&limit=100&fields=items(track(uri)),offset,limit,total',
+		'https://api.spotify.com/v1/users/' . \urlencode($ownerName) . '/playlists/' . \urlencode($id) . '/tracks?offset=' . $offset . '&limit=100&fields=items(track(uri,album(release_date))),offset,limit,total',
 		[
 			'Authorization: Bearer ' . $accessToken
 		]
@@ -174,6 +178,14 @@ function fetchTrackUrisFromPlaylist($accessToken, $ownerName, $id, $offset = nul
 
 			$tracks = $response['items'];
 
+			if (isset($filterByYear)) {
+				$tracks = \array_filter($tracks, function ($each) use ($filterByYear) {
+					$releaseYear = isset($each['track']['album']['release_date']) ? (int) \substr($each['track']['album']['release_date'], 0, 4) : null;
+
+					return \in_array($releaseYear, $filterByYear, true);
+				});
+			}
+
 			$trackUris = \array_map(function ($each) {
 				return $each['track']['uri'];
 			}, $tracks);
@@ -181,7 +193,7 @@ function fetchTrackUrisFromPlaylist($accessToken, $ownerName, $id, $offset = nul
 			if (($offset + $limit) < $total) {
 				$trackUris = \array_merge(
 					$trackUris,
-					\fetchTrackUrisFromPlaylist($accessToken, $ownerName, $id, $offset + $limit)
+					\fetchTrackUrisFromPlaylist($accessToken, $ownerName, $id, $offset + $limit, $filterByYear)
 				);
 			}
 
