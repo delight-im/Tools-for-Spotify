@@ -158,7 +158,7 @@ function fetchTrackUrisFromPlaylist($accessToken, $ownerName, $id, $offset = nul
 
 	$responseJson = makeHttpRequest(
 		'GET',
-		'https://api.spotify.com/v1/users/' . \urlencode($ownerName) . '/playlists/' . \urlencode($id) . '/tracks?offset=' . $offset . '&limit=100&fields=items(track(uri))',
+		'https://api.spotify.com/v1/users/' . \urlencode($ownerName) . '/playlists/' . \urlencode($id) . '/tracks?offset=' . $offset . '&limit=100&fields=items(track(uri)),offset,limit,total',
 		[
 			'Authorization: Bearer ' . $accessToken
 		]
@@ -168,9 +168,20 @@ function fetchTrackUrisFromPlaylist($accessToken, $ownerName, $id, $offset = nul
 		$response = \json_decode($responseJson, true);
 
 		if ($response !== false && isset($response['items'])) {
+			$offset = isset($response['offset']) ? (int) $response['offset'] : null;
+			$limit = isset($response['limit']) ? (int) $response['limit'] : null;
+			$total = isset($response['total']) ? (int) $response['total'] : null;
+
 			$trackUris = \array_map(function ($each) {
 				return $each['track']['uri'];
 			}, $response['items']);
+
+			if (($offset + $limit) < $total) {
+				$trackUris = \array_merge(
+					$trackUris,
+					\fetchTrackUrisFromPlaylist($accessToken, $ownerName, $id, $offset + $limit)
+				);
+			}
 
 			return $trackUris;
 		}
