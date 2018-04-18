@@ -153,10 +153,12 @@ function saveTrackUrisToPlaylist($accessToken, $ownerName, $id, array $uris) {
 	}
 }
 
-function fetchTrackUrisFromPlaylist($accessToken, $ownerName, $id) {
+function fetchTrackUrisFromPlaylist($accessToken, $ownerName, $id, $offset = null) {
+	$offset = isset($offset) ? (int) $offset : 0;
+
 	$responseJson = makeHttpRequest(
 		'GET',
-		'https://api.spotify.com/v1/users/' . \urlencode($ownerName) . '/playlists/' . \urlencode($id) . '/tracks?offset=0&limit=100&fields=items(track(uri))',
+		'https://api.spotify.com/v1/users/' . \urlencode($ownerName) . '/playlists/' . \urlencode($id) . '/tracks?offset=' . $offset . '&limit=100&fields=items(track(uri))',
 		[
 			'Authorization: Bearer ' . $accessToken
 		]
