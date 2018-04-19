@@ -145,10 +145,13 @@ else {
 	\fetchAuthorizationCode($config['api']['clientId']);
 }
 
-function saveTrackUrisToPlaylist($accessToken, $ownerName, $id, array $uris) {
+function saveTrackUrisToPlaylist($accessToken, $ownerName, $id, array $uris, $offset = null) {
 	if (\READ_ONLY_MODE) {
 		return true;
 	}
+
+	$offset = isset($offset) ? (int) $offset : 0;
+	$limit = 100;
 
 	$responseJson = makeHttpRequest(
 		'POST',
@@ -157,13 +160,18 @@ function saveTrackUrisToPlaylist($accessToken, $ownerName, $id, array $uris) {
 			'Authorization: Bearer ' . $accessToken,
 			'Content-Type: application/json'
 		],
-		\json_encode([ 'uris' => $uris ])
+		\json_encode([ 'uris' => \array_slice($uris, $offset, $limit) ])
 	);
 
 	if ($responseJson !== false) {
 		$response = \json_decode($responseJson, true);
-
 		$success = $response !== false && isset($response['snapshot_id']);
+
+		if ($success) {
+			if (($offset + $limit) < \count($uris)) {
+				$success = $success && \saveTrackUrisToPlaylist($accessToken, $ownerName, $id, $uris, $offset + $limit);
+			}
+		}
 
 		return $success;
 	}
