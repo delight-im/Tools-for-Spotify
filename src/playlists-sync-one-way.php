@@ -175,7 +175,7 @@ function fetchTrackUrisFromPlaylist($accessToken, $ownerName, $id, $offset = nul
 		$apiUrl = 'https://api.spotify.com/v1/me/tracks?offset=' . $offset . '&limit=50';
 	}
 
-	$responseJson = makeHttpRequest(
+	$responseJson = makeCacheableHttpRequest(
 		'GET',
 		$apiUrl,
 		[
@@ -415,6 +415,20 @@ function readConfig($pathRelative) {
 		exit(3);
 	}
 }
+
+function makeCacheableHttpRequest($method, $url, array $headers = null, $body = null) {
+	global $httpRequestCache;
+
+	$signature = \sha1(\json_encode(\func_get_args()));
+
+	if (!isset($httpRequestCache[$signature])) {
+		$httpRequestCache[$signature] = \makeHttpRequest($method, $url, $headers, $body);
+	}
+
+	return $httpRequestCache[$signature];
+}
+
+$httpRequestCache = [];
 
 function makeHttpRequest($method, $url, array $headers = null, $body = null) {
 	$options = [
