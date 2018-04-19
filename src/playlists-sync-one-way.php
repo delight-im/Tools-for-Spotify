@@ -163,7 +163,9 @@ function saveTrackUrisToPlaylist($accessToken, $ownerName, $id, array $uris) {
 	if ($responseJson !== false) {
 		$response = \json_decode($responseJson, true);
 
-		return $response !== false && isset($response['snapshot_id']);
+		$success = $response !== false && isset($response['snapshot_id']);
+
+		return $success;
 	}
 	else {
 		return false;
