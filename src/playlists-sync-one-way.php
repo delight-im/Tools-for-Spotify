@@ -14,6 +14,7 @@
 
 \header('Content-Type: text/plain; charset=utf-8');
 
+\define('READ_ONLY_MODE', false);
 \define('CONFIG_PATH_RELATIVE', '../data/config.json');
 \define('DATABASE_PATH_RELATIVE', '../data/database.json');
 \define('SPOTIFY_API_SCOPES', 'playlist-modify-public playlist-modify-private user-library-read');
@@ -145,6 +146,10 @@ else {
 }
 
 function saveTrackUrisToPlaylist($accessToken, $ownerName, $id, array $uris) {
+	if (\READ_ONLY_MODE) {
+		return true;
+	}
+
 	$responseJson = makeHttpRequest(
 		'POST',
 		'https://api.spotify.com/v1/users/' . \urlencode($ownerName) . '/playlists/' . \urlencode($id) . '/tracks',
@@ -342,6 +347,10 @@ function readDatabase($pathRelative) {
 }
 
 function writeDatabase($path, array $data) {
+	if (\READ_ONLY_MODE) {
+		return true;
+	}
+
 	$bytesWritten = @\file_put_contents($path, \json_encode($data, \JSON_PRETTY_PRINT));
 
 	return $bytesWritten !== false;
