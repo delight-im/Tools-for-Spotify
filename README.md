@@ -94,6 +94,7 @@ Tools and utilities for Spotify using the Spotify Web API
 
  * [Spotify Web API](https://developer.spotify.com/web-api/)
    * [Get a playlist’s tracks](https://developer.spotify.com/web-api/get-playlists-tracks/)
+   * [Get a user’s saved tracks](https://developer.spotify.com/web-api/get-users-saved-tracks/)
    * [Add tracks to a playlist](https://developer.spotify.com/web-api/add-tracks-to-playlist/)
    * [Scopes (permissions)](https://developer.spotify.com/web-api/using-scopes/)
 
