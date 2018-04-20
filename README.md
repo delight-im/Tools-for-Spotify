@@ -45,8 +45,8 @@ Tools and utilities for Spotify using the Spotify Web API
     ```json
     {
         "api": {
-            "clientId": "abcdefghijklmnopqrstuvwxyz012345",
-            "clientSecret": "bcdefghijklmnopqrstuvwxyz0123456"
+            "clientId": "u64v81mhz2ntxrilbkpfyd9q07oegjsc",
+            "clientSecret": "wqyt6dbnk7235faxmre4c1lzhpvius80"
         }
     }
     ```
