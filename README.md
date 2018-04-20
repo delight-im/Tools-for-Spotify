@@ -71,12 +71,12 @@ Tools and utilities for Spotify using the Spotify Web API
             "sync": {
                 "oneWay": [
                     {
-                        "from": "spotify:user:spotify:playlist:abcdefghijklmnopqrstuv",
-                        "to": "spotify:user:bcdefghijklmnopqrstuvw:playlist:cdefghijklmnopqrstuvwx"
+                        "from": "spotify:user:spotify:playlist:wvfdktjeqiurxghbymlzan",
+                        "to": "spotify:user:obhqrwlenifzujsdkvtcpa:playlist:phmcblzvgwdisqyfakrenx"
                     },
                     {
-                        "from": "spotify:user:spotify:playlist:defghijklmnopqrstuvwxy",
-                        "to": "spotify:user:bcdefghijklmnopqrstuvw:playlist:efghijklmnopqrstuvwxyz"
+                        "from": "spotify:user:spotify:playlist:htkwibrfuvlyzdmxngqpaj",
+                        "to": "spotify:user:obhqrwlenifzujsdkvtcpa:playlist:ulzhcpatfomqsvbynijwgd"
                     }
                 ]
             }
