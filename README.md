@@ -83,6 +83,10 @@ Tools and utilities for Spotify using the Spotify Web API
                         "from": "spotify:user:spotify:playlist:htkwibrfuvlyzdmxngqpaj",
                         "to": "spotify:user:obhqrwlenifzujsdkvtcpa:playlist:ulzhcpatfomqsvbynijwgd",
                         "filterByYear": [ 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999 ]
+                    },
+                    {
+                        "from": "me:tracks",
+                        "to": "spotify:user:obhqrwlenifzujsdkvtcpa:playlist:kmnwohlftdxycsjgubvqea"
                     }
                 ]
             }
