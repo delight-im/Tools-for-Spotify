@@ -14,21 +14,25 @@
 
 \header('Content-Type: text/plain; charset=utf-8');
 
+require_once __DIR__ . '/Spotify.php';
+require_once __DIR__ . '/SpotifyPlaylist.php';
+require_once __DIR__ . '/Storage.php';
+
 \define('READ_ONLY_MODE', false);
 \define('CONFIG_PATH_RELATIVE', '../data/config.json');
 \define('DATABASE_PATH_RELATIVE', '../data/database.json');
-\define('SPOTIFY_API_SCOPES', 'playlist-modify-public playlist-modify-private user-library-read');
+\define('SPOTIFY_API_SCOPES', [ 'playlist-modify-public', 'playlist-modify-private', 'user-library-read' ]);
 \define('SPOTIFY_URI_PLAYLIST_REGEX', '/^spotify:user:([^:]+):playlist:([^:]+)$/');
 \define('SAVED_TRACKS_PSEUDO_PLAYLIST_URI', 'me:tracks');
 
-$config = \readConfig(\CONFIG_PATH_RELATIVE);
-$database = \readDatabase(\DATABASE_PATH_RELATIVE);
+$config = \Storage::readConfiguration(\CONFIG_PATH_RELATIVE);
+$database = \Storage::readDatabase(\DATABASE_PATH_RELATIVE);
 
 if (isset($_GET['code'])) {
 	echo 'Starting ...' . "\n";
 
 	$requestStartTime = \time();
-	$responseJson = \fetchAccessToken($config['api']['clientId'], $config['api']['clientSecret'], $_GET['code']);
+	$responseJson = \Spotify::fetchAccessToken($config['api']['clientId'], $config['api']['clientSecret'], $_GET['code']);
 
 	if ($responseJson === false) {
 		echo ' * Could not get an access token from the Spotify API ...' . "\n";
@@ -57,7 +61,7 @@ if (isset($_GET['code'])) {
 					}
 
 					if (\preg_match(\SPOTIFY_URI_PLAYLIST_REGEX, $oneWaySync['to'], $oneWaySyncTo)) {
-						$trackUris = \fetchTrackUrisFromPlaylist(
+						$trackUris = \SpotifyPlaylist::fetchTrackUris(
 							$database['auth']['accessToken'],
 							$oneWaySyncFrom[1],
 							$oneWaySyncFrom[2],
@@ -80,7 +84,7 @@ if (isset($_GET['code'])) {
 							$trackUris = \array_values($trackUris);
 
 							if (!empty($trackUris)) {
-								$tracksSavedSuccessfully = \saveTrackUrisToPlaylist(
+								$tracksSavedSuccessfully = \READ_ONLY_MODE || \SpotifyPlaylist::saveTrackUris(
 									$database['auth']['accessToken'],
 									$oneWaySyncTo[1],
 									$oneWaySyncTo[2],
@@ -124,7 +128,7 @@ if (isset($_GET['code'])) {
 			}
 		}
 
-		if (\writeDatabase(\DATABASE_PATH_RELATIVE, $database)) {
+		if (\READ_ONLY_MODE || \Storage::writeDatabase(\DATABASE_PATH_RELATIVE, $database)) {
 			echo 'Succeeded' . "\n";
 		}
 		else {
@@ -142,330 +146,5 @@ elseif (isset($_GET['error'])) {
 	exit(1);
 }
 else {
-	\fetchAuthorizationCode($config['api']['clientId']);
-}
-
-function saveTrackUrisToPlaylist($accessToken, $ownerName, $id, array $uris, $offset = null) {
-	if (\READ_ONLY_MODE) {
-		return true;
-	}
-
-	$offset = isset($offset) ? (int) $offset : 0;
-	$limit = 100;
-
-	$responseJson = makeHttpRequest(
-		'POST',
-		'https://api.spotify.com/v1/users/' . \urlencode($ownerName) . '/playlists/' . \urlencode($id) . '/tracks',
-		[
-			'Authorization: Bearer ' . $accessToken,
-			'Content-Type: application/json'
-		],
-		\json_encode([ 'uris' => \array_slice($uris, $offset, $limit) ])
-	);
-
-	if ($responseJson !== false) {
-		$response = \json_decode($responseJson, true);
-		$success = $response !== false && isset($response['snapshot_id']);
-
-		if ($success) {
-			if (($offset + $limit) < \count($uris)) {
-				$success = $success && \saveTrackUrisToPlaylist($accessToken, $ownerName, $id, $uris, $offset + $limit);
-			}
-		}
-
-		return $success;
-	}
-	else {
-		return false;
-	}
-}
-
-function fetchTrackUrisFromPlaylist($accessToken, $ownerName, $id, $offset = null, $filterByYear = null) {
-	$offset = isset($offset) ? (int) $offset : 0;
-
-	if (isset($ownerName) && isset($id)) {
-		$apiUrl = 'https://api.spotify.com/v1/users/' . \urlencode($ownerName) . '/playlists/' . \urlencode($id) . '/tracks?offset=' . $offset . '&limit=100&fields=items(track(uri,album(release_date))),offset,limit,total';
-	}
-	else {
-		$apiUrl = 'https://api.spotify.com/v1/me/tracks?offset=' . $offset . '&limit=50';
-	}
-
-	$responseJson = makeCacheableHttpRequest(
-		'GET',
-		$apiUrl,
-		[
-			'Authorization: Bearer ' . $accessToken
-		]
-	);
-
-	if ($responseJson !== false) {
-		$response = \json_decode($responseJson, true);
-
-		if ($response !== false && isset($response['items'])) {
-			$offset = isset($response['offset']) ? (int) $response['offset'] : null;
-			$limit = isset($response['limit']) ? (int) $response['limit'] : null;
-			$total = isset($response['total']) ? (int) $response['total'] : null;
-
-			$tracks = $response['items'];
-
-			if (isset($filterByYear)) {
-				$tracks = \array_filter($tracks, function ($each) use ($filterByYear) {
-					$releaseYear = isset($each['track']['album']['release_date']) ? (int) \substr($each['track']['album']['release_date'], 0, 4) : null;
-
-					return \in_array($releaseYear, $filterByYear, true);
-				});
-			}
-
-			$trackUris = \array_map(function ($each) {
-				return $each['track']['uri'];
-			}, $tracks);
-
-			if (($offset + $limit) < $total) {
-				$trackUris = \array_merge(
-					$trackUris,
-					\fetchTrackUrisFromPlaylist($accessToken, $ownerName, $id, $offset + $limit, $filterByYear)
-				);
-			}
-
-			return $trackUris;
-		}
-		else {
-			return null;
-		}
-	}
-	else {
-		return null;
-	}
-}
-
-function fetchAccessToken($clientId, $clientSecret, $authorizationCode) {
-	return makeHttpRequest(
-		'POST',
-		\createAccessTokenEndpointUrl(),
-		[
-			'Content-Type: application/x-www-form-urlencoded'
-		],
-		\createAccessTokenEndpointBody($clientId, $clientSecret, $authorizationCode)
-	);
-}
-
-function fetchAuthorizationCode($clientId) {
-	\header('Location: ' . \createAuthorizationCodeEndpointUrl($clientId));
-}
-
-function createAccessTokenEndpointUrl() {
-	return 'https://accounts.spotify.com/api/token';
-}
-
-function createAccessTokenEndpointBody($clientId, $clientSecret, $authorizationCode) {
-	$body = [];
-
-	$body[] = 'client_id=';
-	$body[] = \urlencode($clientId);
-	$body[] = '&client_secret=';
-	$body[] = \urlencode($clientSecret);
-	$body[] = '&grant_type=';
-	$body[] = 'authorization_code';
-	$body[] = '&code=';
-	$body[] = \urlencode($authorizationCode);
-	$body[] = '&redirect_uri=';
-	$body[] = \urlencode(\createRedirectUri());
-
-	return \implode('', $body);
-}
-
-function createAuthorizationCodeEndpointUrl($clientId) {
-	$url = [];
-
-	$url[] = 'https://accounts.spotify.com/authorize';
-	$url[] = '?client_id=';
-	$url[] = \urlencode($clientId);
-	$url[] = '&response_type=';
-	$url[] = 'code';
-	$url[] = '&redirect_uri=';
-	$url[] = \urlencode(\createRedirectUri());
-	$url[] = '&scope=';
-	$url[] = \urlencode(\SPOTIFY_API_SCOPES);
-	$url[] = '&show_dialog=';
-	$url[] = 'false';
-
-	return \implode('', $url);
-}
-
-function createRedirectUri() {
-	$path = \explode('?', $_SERVER['REQUEST_URI'], 2)[0];
-
-	return $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['SERVER_NAME'] . $path;
-}
-
-function readDatabase($pathRelative) {
-	$path = __DIR__ . '/' . $pathRelative;
-
-	if (\file_exists($path) && \is_file($path)) {
-		if (\is_readable($path)) {
-			if (\is_writable($path)) {
-				$json = @\file_get_contents($path, false);
-
-				if ($json === false) {
-					echo 'Starting ...' . "\n";
-					echo ' * Could not read database ("' . $pathRelative . '") ...' . "\n";
-					echo ' * Cancelling ...' . "\n";
-					echo 'Failed' . "\n";
-					exit(9);
-				}
-				else {
-					$data = \json_decode($json, true);
-
-					if (!\is_array($data)) {
-						$data = [];
-					}
-
-					if (!isset($data['auth'])) {
-						$data['auth'] = [];
-					}
-
-					if (!isset($data['playlists'])) {
-						$data['playlists'] = [];
-					}
-
-					return $data;
-				}
-			}
-			else {
-				echo 'Starting ...' . "\n";
-				echo ' * Could not modify database ("' . $pathRelative . '") ...' . "\n";
-				echo ' * Cancelling ...' . "\n";
-				echo 'Failed' . "\n";
-				exit(8);
-			}
-		}
-		else {
-			echo 'Starting ...' . "\n";
-			echo ' * Could not open database ("' . $pathRelative . '") ...' . "\n";
-			echo ' * Cancelling ...' . "\n";
-			echo 'Failed' . "\n";
-			exit(7);
-		}
-	}
-	else {
-		echo 'Starting ...' . "\n";
-		echo ' * Could not find database ("' . $pathRelative . '") ...' . "\n";
-		echo ' * Cancelling ...' . "\n";
-		echo 'Failed' . "\n";
-		exit(6);
-	}
-}
-
-function writeDatabase($path, array $data) {
-	if (\READ_ONLY_MODE) {
-		return true;
-	}
-
-	$bytesWritten = @\file_put_contents($path, \json_encode($data, \JSON_PRETTY_PRINT));
-
-	return $bytesWritten !== false;
-}
-
-function readConfig($pathRelative) {
-	$path = __DIR__ . '/' . $pathRelative;
-
-	if (\file_exists($path) && \is_file($path)) {
-		if (\is_readable($path)) {
-			$json = @\file_get_contents($path, false);
-
-			if ($json !== false) {
-				$data = \json_decode($json, true);
-
-				if (!\is_array($data)) {
-					$data = [];
-				}
-
-				if (!isset($data['api']['clientId'])) {
-					echo 'Starting ...' . "\n";
-					echo ' * Missing API client ID in configuration ...' . "\n";
-					echo ' * Cancelling ...' . "\n";
-					echo 'Failed' . "\n";
-					exit(11);
-				}
-
-				if (!isset($data['api']['clientSecret'])) {
-					echo 'Starting ...' . "\n";
-					echo ' * Missing API client secret in configuration ...' . "\n";
-					echo ' * Cancelling ...' . "\n";
-					echo 'Failed' . "\n";
-					exit(12);
-				}
-
-				if (!isset($data['playlists'])) {
-					$data['playlists'] = [];
-				}
-
-				if (!isset($data['playlists']['sync'])) {
-					$data['playlists']['sync'] = [];
-				}
-
-				if (!isset($data['playlists']['sync']['oneWay'])) {
-					$data['playlists']['sync']['oneWay'] = [];
-				}
-
-				return $data;
-			}
-			else {
-				echo 'Starting ...' . "\n";
-				echo ' * Could not read configuration ("' . $pathRelative . '") ...' . "\n";
-				echo ' * Cancelling ...' . "\n";
-				echo 'Failed' . "\n";
-				exit(5);
-			}
-		}
-		else {
-			echo 'Starting ...' . "\n";
-			echo ' * Could not open configuration ("' . $pathRelative . '") ...' . "\n";
-			echo ' * Cancelling ...' . "\n";
-			echo 'Failed' . "\n";
-			exit(4);
-		}
-	}
-	else {
-		echo 'Starting ...' . "\n";
-		echo ' * Could not find configuration ("' . $pathRelative . '") ...' . "\n";
-		echo ' * Cancelling ...' . "\n";
-		echo 'Failed' . "\n";
-		exit(3);
-	}
-}
-
-function makeCacheableHttpRequest($method, $url, array $headers = null, $body = null) {
-	global $httpRequestCache;
-
-	$signature = \sha1(\json_encode(\func_get_args()));
-
-	if (!isset($httpRequestCache[$signature])) {
-		$httpRequestCache[$signature] = \makeHttpRequest($method, $url, $headers, $body);
-	}
-
-	return $httpRequestCache[$signature];
-}
-
-$httpRequestCache = [];
-
-function makeHttpRequest($method, $url, array $headers = null, $body = null) {
-	$options = [
-		'http' => [
-			'method' => $method
-		]
-	];
-
-	if (isset($headers)) {
-		$options['http']['header'] = $headers;
-	}
-
-	if (isset($body)) {
-		$options['http']['content'] = $body;
-	}
-
-	$context = \stream_context_create($options);
-	$result = @\file_get_contents($url, false, $context);
-
-	return $result;
+	\Spotify::fetchAuthorizationCode($config['api']['clientId'], \SPOTIFY_API_SCOPES);
 }
