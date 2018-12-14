@@ -56,7 +56,7 @@ Tools and utilities for Spotify using the Spotify Web API
     ```bash
     $ touch data/database.json
     # sudo chown www-data:www-data data/database.json
-    # sudo chmod 0644 data/database.json
+    # sudo chmod 0600 data/database.json
     ```
 
 ## Usage
