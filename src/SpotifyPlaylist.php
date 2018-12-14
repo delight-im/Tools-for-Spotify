@@ -13,7 +13,7 @@ final class SpotifyPlaylist {
 	/**
 	 * Fetches a list of track URIs from the specified playlist
 	 *
-	 * @param string $accessToken the "Access Token" for access to the API
+	 * @param string $accessToken the “Access Token” for access to the API
 	 * @param string $ownerName the name of the playlist's owner
 	 * @param string $id the ID of the playlist
 	 * @param int|null $offset (optional) the offset within the playlist
@@ -81,7 +81,7 @@ final class SpotifyPlaylist {
 	/**
 	 * Saves a list of track URIs to the specified playlist
 	 *
-	 * @param string $accessToken the "Access Token" for access to the API
+	 * @param string $accessToken the “Access Token” for access to the API
 	 * @param string $ownerName the name of the playlist's owner
 	 * @param string $id the ID of the playlist
 	 * @param array $uris the list of URIs

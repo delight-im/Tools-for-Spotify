@@ -11,11 +11,11 @@ require_once __DIR__ . '/Http.php';
 final class Spotify {
 
 	/**
-	 * Fetches an "Access Token" for access to the API
+	 * Fetches an “Access Token” for access to the API
 	 *
-	 * @param string $clientId the "Client ID" for access to the API
-	 * @param string $clientSecret the "Client Secret" for access to the API
-	 * @param string $authorizationCode the "Authorization Code" previously retrieved
+	 * @param string $clientId the “Client ID” for access to the API
+	 * @param string $clientSecret the “Client Secret” for access to the API
+	 * @param string $authorizationCode the “Authorization Code” previously retrieved
 	 * @return string|bool the token or `false` on failure
 	 */
 	public static function fetchAccessToken($clientId, $clientSecret, $authorizationCode) {
@@ -30,17 +30,17 @@ final class Spotify {
 	}
 
 	/**
-	 * Fetches an "Authorization Code" for access to the API
+	 * Fetches an “Authorization Code” for access to the API
 	 *
-	 * @param string $clientId the "Client ID" for access to the API
-	 * @param array $scopes the "Scopes" or permissions to request for access to the API
+	 * @param string $clientId the “Client ID” for access to the API
+	 * @param array $scopes the “Scopes” or permissions to request for access to the API
 	 */
 	public static function fetchAuthorizationCode($clientId, array $scopes) {
 		\header('Location: ' . self::createAuthorizationCodeEndpointUrl($clientId, $scopes));
 	}
 
 	/**
-	 * Creates the URL for the endpoint where an "Access Token" can be retrieved
+	 * Creates the URL for the endpoint where an “Access Token” can be retrieved
 	 *
 	 * @return string
 	 */
@@ -49,11 +49,11 @@ final class Spotify {
 	}
 
 	/**
-	 * Creates the request body for the endpoint where an "Access Token" can be retrieved
+	 * Creates the request body for the endpoint where an “Access Token” can be retrieved
 	 *
-	 * @param string $clientId the "Client ID" for access to the API
-	 * @param string $clientSecret the "Client Secret" for access to the API
-	 * @param string $authorizationCode the "Authorization Code" previously retrieved
+	 * @param string $clientId the “Client ID” for access to the API
+	 * @param string $clientSecret the “Client Secret” for access to the API
+	 * @param string $authorizationCode the “Authorization Code” previously retrieved
 	 * @return string
 	 */
 	private static function createAccessTokenEndpointBody($clientId, $clientSecret, $authorizationCode) {
@@ -74,10 +74,10 @@ final class Spotify {
 	}
 
 	/**
-	 * Creates the URL for the endpoint where an "Authorization Code" can be retrieved
+	 * Creates the URL for the endpoint where an “Authorization Code” can be retrieved
 	 *
-	 * @param string $clientId the "Client ID" for access to the API
-	 * @param array $scopes the "Scopes" or permissions to request for access to the API
+	 * @param string $clientId the “Client ID” for access to the API
+	 * @param array $scopes the “Scopes” or permissions to request for access to the API
 	 * @return string
 	 */
 	private static function createAuthorizationCodeEndpointUrl($clientId, array $scopes) {
