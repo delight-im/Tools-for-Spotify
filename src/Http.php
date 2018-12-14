@@ -8,8 +8,18 @@
 
 final class Http {
 
+	/** @var array the cache used for all requests declared to be cacheable */
 	private static $requestCache = [];
 
+	/**
+	 * Makes an HTTP request
+	 *
+	 * @param string $method the request method to use, e.g. `GET` or `POST`
+	 * @param string $url the target URL to request
+	 * @param array|null $headers (optional) a list of additional HTTP headers
+	 * @param string|null $body (optional) the request body
+	 * @return string|bool the response data or `false` on failure
+	 */
 	public static function makeRequest($method, $url, array $headers = null, $body = null) {
 		$options = [
 			'http' => [
@@ -31,6 +41,15 @@ final class Http {
 		return $result;
 	}
 
+	/**
+	 * Makes a cacheable HTTP request
+	 *
+	 * @param string $method the request method to use, e.g. `GET` or `POST`
+	 * @param string $url the target URL to request
+	 * @param array|null $headers (optional) a list of additional HTTP headers
+	 * @param string|null $body (optional) the request body
+	 * @return string|bool the response data or `false` on failure
+	 */
 	public static function makeCacheableRequest($method, $url, array $headers = null, $body = null) {
 		$signature = \sha1(\json_encode(\func_get_args()));
 

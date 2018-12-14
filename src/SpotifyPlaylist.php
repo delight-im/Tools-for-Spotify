@@ -10,6 +10,16 @@ require_once __DIR__ . '/Http.php';
 
 final class SpotifyPlaylist {
 
+	/**
+	 * Fetches a list of track URIs from the specified playlist
+	 *
+	 * @param string $accessToken the "Access Token" for access to the API
+	 * @param string $ownerName the name of the playlist's owner
+	 * @param string $id the ID of the playlist
+	 * @param int|null $offset (optional) the offset within the playlist
+	 * @param array|null $filterByYear (optional) a list of years to filter by
+	 * @return array|null the list of URIs or `null`
+	 */
 	public static function fetchTrackUris($accessToken, $ownerName, $id, $offset = null, $filterByYear = null) {
 		$offset = isset($offset) ? (int) $offset : 0;
 
@@ -68,6 +78,16 @@ final class SpotifyPlaylist {
 		}
 	}
 
+	/**
+	 * Saves a list of track URIs to the specified playlist
+	 *
+	 * @param string $accessToken the "Access Token" for access to the API
+	 * @param string $ownerName the name of the playlist's owner
+	 * @param string $id the ID of the playlist
+	 * @param array $uris the list of URIs
+	 * @param int|null $offset (optional) the offset within the list of URIs
+	 * @return bool whether the tracks could be saved to the playlist
+	 */
 	public static function saveTrackUris($accessToken, $ownerName, $id, array $uris, $offset = null) {
 		$offset = isset($offset) ? (int) $offset : 0;
 		$limit = 100;

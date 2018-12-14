@@ -8,6 +8,12 @@
 
 final class Storage {
 
+	/**
+	 * Reads data from a configuration file
+	 *
+	 * @param string $pathRelative the relative path to the configuration file
+	 * @return array|null
+	 */
 	public static function readConfiguration($pathRelative) {
 		$path = __DIR__ . '/' . $pathRelative;
 
@@ -77,6 +83,12 @@ final class Storage {
 		}
 	}
 
+	/**
+	 * Reads data from a database file
+	 *
+	 * @param string $pathRelative the relative path to the database file
+	 * @return array|null
+	 */
 	public static function readDatabase($pathRelative) {
 		$path = __DIR__ . '/' . $pathRelative;
 
@@ -135,6 +147,13 @@ final class Storage {
 		}
 	}
 
+	/**
+	 * Writes data to a database file
+	 *
+	 * @param string $path the path to the database file
+	 * @param array $data the data to write
+	 * @return bool whether the data could be written to the file
+	 */
 	public static function writeDatabase($path, array $data) {
 		$bytesWritten = @\file_put_contents($path, \json_encode($data, \JSON_PRETTY_PRINT));
 

@@ -10,6 +10,14 @@ require_once __DIR__ . '/Http.php';
 
 final class Spotify {
 
+	/**
+	 * Fetches an "Access Token" for access to the API
+	 *
+	 * @param string $clientId the "Client ID" for access to the API
+	 * @param string $clientSecret the "Client Secret" for access to the API
+	 * @param string $authorizationCode the "Authorization Code" previously retrieved
+	 * @return string|bool the token or `false` on failure
+	 */
 	public static function fetchAccessToken($clientId, $clientSecret, $authorizationCode) {
 		return \Http::makeRequest(
 			'POST',
@@ -21,14 +29,33 @@ final class Spotify {
 		);
 	}
 
+	/**
+	 * Fetches an "Authorization Code" for access to the API
+	 *
+	 * @param string $clientId the "Client ID" for access to the API
+	 * @param array $scopes the "Scopes" or permissions to request for access to the API
+	 */
 	public static function fetchAuthorizationCode($clientId, array $scopes) {
 		\header('Location: ' . self::createAuthorizationCodeEndpointUrl($clientId, $scopes));
 	}
 
+	/**
+	 * Creates the URL for the endpoint where an "Access Token" can be retrieved
+	 *
+	 * @return string
+	 */
 	private static function createAccessTokenEndpointUrl() {
 		return 'https://accounts.spotify.com/api/token';
 	}
 
+	/**
+	 * Creates the request body for the endpoint where an "Access Token" can be retrieved
+	 *
+	 * @param string $clientId the "Client ID" for access to the API
+	 * @param string $clientSecret the "Client Secret" for access to the API
+	 * @param string $authorizationCode the "Authorization Code" previously retrieved
+	 * @return string
+	 */
 	private static function createAccessTokenEndpointBody($clientId, $clientSecret, $authorizationCode) {
 		$body = [];
 
@@ -46,6 +73,13 @@ final class Spotify {
 		return \implode('', $body);
 	}
 
+	/**
+	 * Creates the URL for the endpoint where an "Authorization Code" can be retrieved
+	 *
+	 * @param string $clientId the "Client ID" for access to the API
+	 * @param array $scopes the "Scopes" or permissions to request for access to the API
+	 * @return string
+	 */
 	private static function createAuthorizationCodeEndpointUrl($clientId, array $scopes) {
 		$url = [];
 
@@ -66,6 +100,11 @@ final class Spotify {
 		return \implode('', $url);
 	}
 
+	/**
+	 * Creates a URL to redirect to after an authorization attempt
+	 *
+	 * @return string
+	 */
 	private static function createRedirectUrl() {
 		$path = \explode('?', $_SERVER['REQUEST_URI'], 2)[0];
 
