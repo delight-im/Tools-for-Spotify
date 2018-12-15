@@ -51,7 +51,7 @@ if (isset($_GET['code'])) {
 
 		foreach ($config['playlists']['sync']['oneWay'] as $oneWaySync) {
 			if (isset($oneWaySync['from']) && isset($oneWaySync['to'])) {
-				echo '   * From “' . $oneWaySync['from'] . '” to “' . $oneWaySync['to'] . '” ...' . "\n";
+				echo '   * From “' . (!empty($oneWaySync['fromName']) ? $oneWaySync['fromName'] : $oneWaySync['from']) . '” to “' . (!empty($oneWaySync['toName']) ? $oneWaySync['toName'] : $oneWaySync['to']) . '” ...' . "\n";
 
 				$filterByYear = (isset($oneWaySync['filterByYear']) && \is_array($oneWaySync['filterByYear']) && !empty($oneWaySync['filterByYear'])) ? $oneWaySync['filterByYear'] : null;
 
