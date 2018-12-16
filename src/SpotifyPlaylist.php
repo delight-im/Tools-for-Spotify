@@ -61,9 +61,15 @@ final class SpotifyPlaylist {
 				}, $tracks);
 
 				if (($offset + $limit) < $total) {
+					$remainingTrackUris = self::fetchTrackUris($accessToken, $ownerName, $id, $offset + $limit, $filterByYear);
+
+					if ($remainingTrackUris === null) {
+						return null;
+					}
+
 					$trackUris = \array_merge(
 						$trackUris,
-						self::fetchTrackUris($accessToken, $ownerName, $id, $offset + $limit, $filterByYear)
+						$remainingTrackUris
 					);
 				}
 
