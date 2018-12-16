@@ -53,7 +53,7 @@ if (isset($_GET['code'])) {
 			if (isset($oneWaySync['from']) && isset($oneWaySync['to'])) {
 				echo '   * From “' . (!empty($oneWaySync['fromName']) ? $oneWaySync['fromName'] : $oneWaySync['from']) . '” to “' . (!empty($oneWaySync['toName']) ? $oneWaySync['toName'] : $oneWaySync['to']) . '” ...' . "\n";
 
-				$filterByYear = (isset($oneWaySync['filterByYear']) && \is_array($oneWaySync['filterByYear']) && !empty($oneWaySync['filterByYear'])) ? $oneWaySync['filterByYear'] : null;
+				$whereYearIn = (isset($oneWaySync['whereYearIn']) && \is_array($oneWaySync['whereYearIn']) && !empty($oneWaySync['whereYearIn'])) ? $oneWaySync['whereYearIn'] : null;
 
 				if (\preg_match(\SPOTIFY_URI_PLAYLIST_REGEX, $oneWaySync['from'], $oneWaySyncFrom) || $oneWaySync['from'] === \SAVED_TRACKS_PSEUDO_PLAYLIST_URI) {
 					if ($oneWaySync['from'] === \SAVED_TRACKS_PSEUDO_PLAYLIST_URI) {
@@ -66,7 +66,7 @@ if (isset($_GET['code'])) {
 							$oneWaySyncFrom[1],
 							$oneWaySyncFrom[2],
 							null,
-							$filterByYear
+							$whereYearIn
 						);
 
 						if ($trackUris !== null) {

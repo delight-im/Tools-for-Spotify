@@ -17,10 +17,10 @@ final class SpotifyPlaylist {
 	 * @param string $ownerName the name of the playlist's owner
 	 * @param string $id the ID of the playlist
 	 * @param int|null $offset (optional) the offset within the playlist
-	 * @param array|null $filterByYear (optional) a list of years to filter by
+	 * @param array|null $whereYearIn (optional) a list of years to filter by
 	 * @return array|null the list of URIs or `null`
 	 */
-	public static function fetchTrackUris($accessToken, $ownerName, $id, $offset = null, $filterByYear = null) {
+	public static function fetchTrackUris($accessToken, $ownerName, $id, $offset = null, $whereYearIn = null) {
 		$offset = isset($offset) ? (int) $offset : 0;
 
 		if (isset($ownerName) && isset($id)) {
@@ -48,11 +48,11 @@ final class SpotifyPlaylist {
 
 				$tracks = $response['items'];
 
-				if (isset($filterByYear)) {
-					$tracks = \array_filter($tracks, function ($each) use ($filterByYear) {
+				if (isset($whereYearIn)) {
+					$tracks = \array_filter($tracks, function ($each) use ($whereYearIn) {
 						$releaseYear = isset($each['track']['album']['release_date']) ? (int) \substr($each['track']['album']['release_date'], 0, 4) : null;
 
-						return \in_array($releaseYear, $filterByYear, true);
+						return \in_array($releaseYear, $whereYearIn, true);
 					});
 				}
 
@@ -61,7 +61,7 @@ final class SpotifyPlaylist {
 				}, $tracks);
 
 				if (($offset + $limit) < $total) {
-					$remainingTrackUris = self::fetchTrackUris($accessToken, $ownerName, $id, $offset + $limit, $filterByYear);
+					$remainingTrackUris = self::fetchTrackUris($accessToken, $ownerName, $id, $offset + $limit, $whereYearIn);
 
 					if ($remainingTrackUris === null) {
 						return null;
