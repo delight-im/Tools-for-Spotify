@@ -24,7 +24,13 @@ final class SpotifyPlaylist {
 		$offset = isset($offset) ? (int) $offset : 0;
 
 		if (isset($ownerName) && isset($id)) {
-			$apiUrl = 'https://api.spotify.com/v1/users/' . \urlencode($ownerName) . '/playlists/' . \urlencode($id) . '/tracks?offset=' . $offset . '&limit=100&fields=items(track(uri,album(release_date))),offset,limit,total';
+			$trackFields = 'uri';
+
+			if (isset($whereYearIn)) {
+				$trackFields .= ',album(release_date)';
+			}
+
+			$apiUrl = 'https://api.spotify.com/v1/users/' . \urlencode($ownerName) . '/playlists/' . \urlencode($id) . '/tracks?offset=' . $offset . '&limit=100&fields=items(track(' . $trackFields . ')),offset,limit,total';
 		}
 		else {
 			$apiUrl = 'https://api.spotify.com/v1/me/tracks?offset=' . $offset . '&limit=50';
