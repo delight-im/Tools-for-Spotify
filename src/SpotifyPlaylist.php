@@ -18,9 +18,13 @@ final class SpotifyPlaylist {
 	 * @param string $id the ID of the playlist
 	 * @param int|null $offset (optional) the offset within the playlist
 	 * @param array|null $whereYearIn (optional) a list of years to filter by
+	 * @param array|null $whereAnyArtistIn (optional) a list of artist names or IDs to filter by
+	 * @param array|null $whereAnyArtistNotIn (optional) a list of artist names or IDs to filter by
+	 * @param array|null $whereAllArtistsIn (optional) a list of artist names or IDs to filter by
+	 * @param array|null $whereAllArtistsNotIn (optional) a list of artist names or IDs to filter by
 	 * @return array|null the list of URIs or `null`
 	 */
-	public static function fetchTrackUris($accessToken, $ownerName, $id, $offset = null, $whereYearIn = null) {
+	public static function fetchTrackUris($accessToken, $ownerName, $id, $offset = null, $whereYearIn = null, $whereAnyArtistIn = null, $whereAnyArtistNotIn = null, $whereAllArtistsIn = null, $whereAllArtistsNotIn = null) {
 		$offset = isset($offset) ? (int) $offset : 0;
 
 		if (isset($ownerName) && isset($id)) {
@@ -28,6 +32,10 @@ final class SpotifyPlaylist {
 
 			if (isset($whereYearIn)) {
 				$trackFields .= ',album(release_date)';
+			}
+
+			if (isset($whereAnyArtistIn) || isset($whereAnyArtistNotIn) || isset($whereAllArtistsIn) || isset($whereAllArtistsNotIn)) {
+				$trackFields .= ',artists';
 			}
 
 			$apiUrl = 'https://api.spotify.com/v1/users/' . \urlencode($ownerName) . '/playlists/' . \urlencode($id) . '/tracks?offset=' . $offset . '&limit=100&fields=items(track(' . $trackFields . ')),offset,limit,total';
@@ -62,12 +70,76 @@ final class SpotifyPlaylist {
 					});
 				}
 
+				if (isset($whereAnyArtistIn)) {
+					$tracks = \array_filter($tracks, function ($each) use ($whereAnyArtistIn) {
+						if (isset($each['track']['artists']) && \is_array($each['track']['artists']) && !empty($each['track']['artists'])) {
+							foreach ($each['track']['artists'] as $artist) {
+								$matches = (isset($artist['id']) && \in_array($artist['id'], $whereAnyArtistIn, true)) || (isset($artist['name']) && \in_array($artist['name'], $whereAnyArtistIn, true));
+
+								if ($matches) {
+									return true;
+								}
+							}
+						}
+
+						return false;
+					});
+				}
+
+				if (isset($whereAnyArtistNotIn)) {
+					$tracks = \array_filter($tracks, function ($each) use ($whereAnyArtistNotIn) {
+						if (isset($each['track']['artists']) && \is_array($each['track']['artists']) && !empty($each['track']['artists'])) {
+							foreach ($each['track']['artists'] as $artist) {
+								$matches = (isset($artist['id']) && \in_array($artist['id'], $whereAnyArtistNotIn, true)) || (isset($artist['name']) && \in_array($artist['name'], $whereAnyArtistNotIn, true));
+
+								if (!$matches) {
+									return true;
+								}
+							}
+						}
+
+						return false;
+					});
+				}
+
+				if (isset($whereAllArtistsIn)) {
+					$tracks = \array_filter($tracks, function ($each) use ($whereAllArtistsIn) {
+						if (isset($each['track']['artists']) && \is_array($each['track']['artists']) && !empty($each['track']['artists'])) {
+							foreach ($each['track']['artists'] as $artist) {
+								$matches = (isset($artist['id']) && \in_array($artist['id'], $whereAllArtistsIn, true)) || (isset($artist['name']) && \in_array($artist['name'], $whereAllArtistsIn, true));
+
+								if (!$matches) {
+									return false;
+								}
+							}
+						}
+
+						return true;
+					});
+				}
+
+				if (isset($whereAllArtistsNotIn)) {
+					$tracks = \array_filter($tracks, function ($each) use ($whereAllArtistsNotIn) {
+						if (isset($each['track']['artists']) && \is_array($each['track']['artists']) && !empty($each['track']['artists'])) {
+							foreach ($each['track']['artists'] as $artist) {
+								$matches = (isset($artist['id']) && \in_array($artist['id'], $whereAllArtistsNotIn, true)) || (isset($artist['name']) && \in_array($artist['name'], $whereAllArtistsNotIn, true));
+
+								if ($matches) {
+									return false;
+								}
+							}
+						}
+
+						return true;
+					});
+				}
+
 				$trackUris = \array_map(function ($each) {
 					return $each['track']['uri'];
 				}, $tracks);
 
 				if (($offset + $limit) < $total) {
-					$remainingTrackUris = self::fetchTrackUris($accessToken, $ownerName, $id, $offset + $limit, $whereYearIn);
+					$remainingTrackUris = self::fetchTrackUris($accessToken, $ownerName, $id, $offset + $limit, $whereYearIn, $whereAnyArtistIn, $whereAnyArtistNotIn, $whereAllArtistsIn, $whereAllArtistsNotIn);
 
 					if ($remainingTrackUris === null) {
 						return null;

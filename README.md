@@ -87,6 +87,26 @@ Tools and utilities for Spotify using the Spotify Web API
                     {
                         "from": "me:tracks",
                         "to": "spotify:user:obhqrwlenifzujsdkvtcpa:playlist:kmnwohlftdxycsjgubvqea"
+                    },
+                    {
+                        "from": "me:tracks",
+                        "to": "spotify:user:obhqrwlenifzujsdkvtcpa:playlist:QXe53JVVBXNUKSq5DVqvmt",
+                        "whereAnyArtistIn": [ "Jane Doe" ]
+                    },
+                    {
+                        "from": "me:tracks",
+                        "to": "spotify:user:obhqrwlenifzujsdkvtcpa:playlist:wTSJoQhAQqBVMOmxXfN59a",
+                        "whereAnyArtistNotIn": [ "9HfCfBYiosO7t62GILFGxB", "LrN6zjcmbUqA0HCXIlNPVL" ]
+                    },
+                    {
+                        "from": "spotify:user:spotify:playlist:KA2A81ktI0MXEPbtGlZs0S",
+                        "to": "spotify:user:obhqrwlenifzujsdkvtcpa:playlist:YxUE0blqg47ipugIas7LhT",
+                        "whereAllArtistsIn": [ "John Doe", "twba9w5BGoQilbkB3mTNW2", "Jane Doe" ]
+                    },
+                    {
+                        "from": "spotify:user:spotify:playlist:VaOezYffujjiSF3BQnCCeu",
+                        "to": "spotify:user:obhqrwlenifzujsdkvtcpa:playlist:9GiNzhW3zqDW9CkkKVbyyo",
+                        "whereAllArtistsNotIn": [ "wUHkEcqvsWEOq6h85BYs4R" ]
                     }
                 ]
             }

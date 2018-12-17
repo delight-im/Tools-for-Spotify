@@ -54,6 +54,10 @@ if (isset($_GET['code'])) {
 				echo '   * From “' . (!empty($oneWaySync['fromName']) ? $oneWaySync['fromName'] : $oneWaySync['from']) . '” to “' . (!empty($oneWaySync['toName']) ? $oneWaySync['toName'] : $oneWaySync['to']) . '” ...' . "\n";
 
 				$whereYearIn = (isset($oneWaySync['whereYearIn']) && \is_array($oneWaySync['whereYearIn']) && !empty($oneWaySync['whereYearIn'])) ? $oneWaySync['whereYearIn'] : null;
+				$whereAnyArtistIn = (isset($oneWaySync['whereAnyArtistIn']) && \is_array($oneWaySync['whereAnyArtistIn']) && !empty($oneWaySync['whereAnyArtistIn'])) ? $oneWaySync['whereAnyArtistIn'] : null;
+				$whereAnyArtistNotIn = (isset($oneWaySync['whereAnyArtistNotIn']) && \is_array($oneWaySync['whereAnyArtistNotIn']) && !empty($oneWaySync['whereAnyArtistNotIn'])) ? $oneWaySync['whereAnyArtistNotIn'] : null;
+				$whereAllArtistsIn = (isset($oneWaySync['whereAllArtistsIn']) && \is_array($oneWaySync['whereAllArtistsIn']) && !empty($oneWaySync['whereAllArtistsIn'])) ? $oneWaySync['whereAllArtistsIn'] : null;
+				$whereAllArtistsNotIn = (isset($oneWaySync['whereAllArtistsNotIn']) && \is_array($oneWaySync['whereAllArtistsNotIn']) && !empty($oneWaySync['whereAllArtistsNotIn'])) ? $oneWaySync['whereAllArtistsNotIn'] : null;
 
 				if (\preg_match(\SPOTIFY_URI_PLAYLIST_REGEX, $oneWaySync['from'], $oneWaySyncFrom) || $oneWaySync['from'] === \SAVED_TRACKS_PSEUDO_PLAYLIST_URI) {
 					if ($oneWaySync['from'] === \SAVED_TRACKS_PSEUDO_PLAYLIST_URI) {
@@ -66,7 +70,11 @@ if (isset($_GET['code'])) {
 							$oneWaySyncFrom[1],
 							$oneWaySyncFrom[2],
 							null,
-							$whereYearIn
+							$whereYearIn,
+							$whereAnyArtistIn,
+							$whereAnyArtistNotIn,
+							$whereAllArtistsIn,
+							$whereAllArtistsNotIn
 						);
 
 						if ($trackUris !== null) {
