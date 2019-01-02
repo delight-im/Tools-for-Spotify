@@ -45,6 +45,47 @@ final class SpotifyPlaylist {
 	}
 
 	/**
+	 * Saves a list of track URIs to the specified playlist
+	 *
+	 * @param string $accessToken the “Access Token” for access to the API
+	 * @param string $ownerName the name of the playlist's owner
+	 * @param string $id the ID of the playlist
+	 * @param array $uris the list of URIs
+	 * @param int|null $offset (optional) the offset within the list of URIs
+	 * @return bool whether the tracks could be saved to the playlist
+	 */
+	public static function saveTrackUris($accessToken, $ownerName, $id, array $uris, $offset = null) {
+		$offset = isset($offset) ? (int) $offset : 0;
+		$limit = 100;
+
+		$responseJson = \Http::makeRequest(
+			'POST',
+			'https://api.spotify.com/v1/users/' . \urlencode($ownerName) . '/playlists/' . \urlencode($id) . '/tracks',
+			[
+				'Authorization: Bearer ' . $accessToken,
+				'Content-Type: application/json'
+			],
+			\json_encode([ 'uris' => \array_slice($uris, $offset, $limit) ])
+		);
+
+		if ($responseJson !== false) {
+			$response = \json_decode($responseJson, true);
+			$success = $response !== false && isset($response['snapshot_id']);
+
+			if ($success) {
+				if (($offset + $limit) < \count($uris)) {
+					$success = $success && self::saveTrackUris($accessToken, $ownerName, $id, $uris, $offset + $limit);
+				}
+			}
+
+			return $success;
+		}
+		else {
+			return false;
+		}
+	}
+
+	/**
 	 * Fetches a list of tracks from the specified playlist
 	 *
 	 * @param string $accessToken the “Access Token” for access to the API
@@ -203,47 +244,6 @@ final class SpotifyPlaylist {
 		}
 		else {
 			return null;
-		}
-	}
-
-	/**
-	 * Saves a list of track URIs to the specified playlist
-	 *
-	 * @param string $accessToken the “Access Token” for access to the API
-	 * @param string $ownerName the name of the playlist's owner
-	 * @param string $id the ID of the playlist
-	 * @param array $uris the list of URIs
-	 * @param int|null $offset (optional) the offset within the list of URIs
-	 * @return bool whether the tracks could be saved to the playlist
-	 */
-	public static function saveTrackUris($accessToken, $ownerName, $id, array $uris, $offset = null) {
-		$offset = isset($offset) ? (int) $offset : 0;
-		$limit = 100;
-
-		$responseJson = \Http::makeRequest(
-			'POST',
-			'https://api.spotify.com/v1/users/' . \urlencode($ownerName) . '/playlists/' . \urlencode($id) . '/tracks',
-			[
-				'Authorization: Bearer ' . $accessToken,
-				'Content-Type: application/json'
-			],
-			\json_encode([ 'uris' => \array_slice($uris, $offset, $limit) ])
-		);
-
-		if ($responseJson !== false) {
-			$response = \json_decode($responseJson, true);
-			$success = $response !== false && isset($response['snapshot_id']);
-
-			if ($success) {
-				if (($offset + $limit) < \count($uris)) {
-					$success = $success && self::saveTrackUris($accessToken, $ownerName, $id, $uris, $offset + $limit);
-				}
-			}
-
-			return $success;
-		}
-		else {
-			return false;
 		}
 	}
 
