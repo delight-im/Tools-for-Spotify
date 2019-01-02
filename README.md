@@ -24,6 +24,7 @@ Tools and utilities for Spotify using the Spotify Web API
 
        ```
        http://localhost/Tools-for-Spotify/src/playlists-sync-one-way.php
+       http://localhost/Tools-for-Spotify/src/playlists-backup.php
        ```
 
        using whatever may be the URL to your (local) version of this project
@@ -118,6 +119,37 @@ Tools and utilities for Spotify using the Spotify Web API
 
     ```
     http://localhost/Tools-for-Spotify/src/playlists-sync-one-way.php
+    ```
+
+### Backing up playlists
+
+ 1. Define your desired sources in `data/config.json`, e.g. like this:
+
+    ```json
+    {
+        "playlists": {
+            "backup": [
+                {
+                    "which": "spotify:user:obhqrwlenifzujsdkvtcpa:playlist:phmcblzvgwdisqyfakrenx"
+                },
+                {
+                    "which": "me:tracks"
+                }
+            ]
+        }
+    }
+    ```
+
+ 1. Make sure that the `backups` directory is writable by the web server, e.g. using the following command:
+
+    ```bash
+    $ sudo chown www-data:www-data backups
+    ```
+
+ 1. Navigate your browser to
+
+    ```
+    http://localhost/Tools-for-Spotify/src/playlists-backup.php
     ```
 
 ## References
