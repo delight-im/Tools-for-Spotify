@@ -11,34 +11,42 @@ require_once __DIR__ . '/Http.php';
 final class SpotifyPlaylist {
 
 	/**
-	 * Fetches a list of track URIs from the specified playlist
+	 * Fetches a list of tracks from the specified playlist
 	 *
 	 * @param string $accessToken the “Access Token” for access to the API
 	 * @param string $ownerName the name of the playlist's owner
 	 * @param string $id the ID of the playlist
-	 * @param int|null $offset (optional) the offset within the playlist
 	 * @param array|null $whereYearIn (optional) a list of years to filter by
 	 * @param array|null $whereAnyArtistIn (optional) a list of artist names or IDs to filter by
 	 * @param array|null $whereAnyArtistNotIn (optional) a list of artist names or IDs to filter by
 	 * @param array|null $whereAllArtistsIn (optional) a list of artist names or IDs to filter by
 	 * @param array|null $whereAllArtistsNotIn (optional) a list of artist names or IDs to filter by
-	 * @return array|null the list of URIs or `null`
+	 * @param bool|null $idsOnly (optional) whether to return scalar IDs only instead of extended records
+	 * @param int|null $offset (optional) the offset within the playlist
+	 * @return array|null the list of tracks or `null`
 	 */
-	public static function fetchTrackUris($accessToken, $ownerName, $id, $offset = null, $whereYearIn = null, $whereAnyArtistIn = null, $whereAnyArtistNotIn = null, $whereAllArtistsIn = null, $whereAllArtistsNotIn = null) {
+	private static function fetchTracksInternal($accessToken, $ownerName, $id, $whereYearIn = null, $whereAnyArtistIn = null, $whereAnyArtistNotIn = null, $whereAllArtistsIn = null, $whereAllArtistsNotIn = null, $idsOnly = null, $offset = null) {
 		$offset = isset($offset) ? (int) $offset : 0;
 
 		if (isset($ownerName) && isset($id)) {
-			$trackFields = 'uri';
+			if ($idsOnly) {
+				$itemFields = '';
+				$trackFields = 'uri';
 
-			if (isset($whereYearIn)) {
-				$trackFields .= ',album(release_date)';
+				if (isset($whereYearIn)) {
+					$trackFields .= ',album(release_date)';
+				}
+
+				if (isset($whereAnyArtistIn) || isset($whereAnyArtistNotIn) || isset($whereAllArtistsIn) || isset($whereAllArtistsNotIn)) {
+					$trackFields .= ',artists';
+				}
+			}
+			else {
+				$itemFields = 'added_at,added_by(uri),';
+				$trackFields = 'album(album_type,id,name,release_date,uri),artists(id,name,uri),disc_number,duration_ms,external_ids,id,name,track_number,uri';
 			}
 
-			if (isset($whereAnyArtistIn) || isset($whereAnyArtistNotIn) || isset($whereAllArtistsIn) || isset($whereAllArtistsNotIn)) {
-				$trackFields .= ',artists';
-			}
-
-			$apiUrl = 'https://api.spotify.com/v1/users/' . \urlencode($ownerName) . '/playlists/' . \urlencode($id) . '/tracks?offset=' . $offset . '&limit=100&fields=items(track(' . $trackFields . ')),offset,limit,total';
+			$apiUrl = 'https://api.spotify.com/v1/users/' . \urlencode($ownerName) . '/playlists/' . \urlencode($id) . '/tracks?offset=' . $offset . '&limit=100&fields=items(' . $itemFields . 'track(' . $trackFields . ')),offset,limit,total';
 		}
 		else {
 			$apiUrl = 'https://api.spotify.com/v1/me/tracks?offset=' . $offset . '&limit=50';
@@ -134,24 +142,26 @@ final class SpotifyPlaylist {
 					});
 				}
 
-				$trackUris = \array_map(function ($each) {
-					return $each['track']['uri'];
-				}, $tracks);
+				if ($idsOnly) {
+					$tracks = \array_map(function ($each) {
+						return $each['track']['uri'];
+					}, $tracks);
+				}
 
 				if (($offset + $limit) < $total) {
-					$remainingTrackUris = self::fetchTrackUris($accessToken, $ownerName, $id, $offset + $limit, $whereYearIn, $whereAnyArtistIn, $whereAnyArtistNotIn, $whereAllArtistsIn, $whereAllArtistsNotIn);
+					$remainingTracks = self::fetchTracksInternal($accessToken, $ownerName, $id, $whereYearIn, $whereAnyArtistIn, $whereAnyArtistNotIn, $whereAllArtistsIn, $whereAllArtistsNotIn, $idsOnly, $offset + $limit);
 
-					if ($remainingTrackUris === null) {
+					if ($remainingTracks === null) {
 						return null;
 					}
 
-					$trackUris = \array_merge(
-						$trackUris,
-						$remainingTrackUris
+					$tracks = \array_merge(
+						$tracks,
+						$remainingTracks
 					);
 				}
 
-				return $trackUris;
+				return $tracks;
 			}
 			else {
 				return null;
