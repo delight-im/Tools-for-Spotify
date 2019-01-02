@@ -69,7 +69,6 @@ if (isset($_GET['code'])) {
 							$database['auth']['accessToken'],
 							$oneWaySyncFrom[1],
 							$oneWaySyncFrom[2],
-							null,
 							$whereYearIn,
 							$whereAnyArtistIn,
 							$whereAnyArtistNotIn,

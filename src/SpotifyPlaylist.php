@@ -11,6 +11,23 @@ require_once __DIR__ . '/Http.php';
 final class SpotifyPlaylist {
 
 	/**
+	 * Fetches a list of track URIs from the specified playlist
+	 *
+	 * @param string $accessToken the “Access Token” for access to the API
+	 * @param string $ownerName the name of the playlist's owner
+	 * @param string $id the ID of the playlist
+	 * @param array|null $whereYearIn (optional) a list of years to filter by
+	 * @param array|null $whereAnyArtistIn (optional) a list of artist names or IDs to filter by
+	 * @param array|null $whereAnyArtistNotIn (optional) a list of artist names or IDs to filter by
+	 * @param array|null $whereAllArtistsIn (optional) a list of artist names or IDs to filter by
+	 * @param array|null $whereAllArtistsNotIn (optional) a list of artist names or IDs to filter by
+	 * @return array|null the list of track URIs or `null`
+	 */
+	public static function fetchTrackUris($accessToken, $ownerName, $id, $whereYearIn = null, $whereAnyArtistIn = null, $whereAnyArtistNotIn = null, $whereAllArtistsIn = null, $whereAllArtistsNotIn = null) {
+		return self::fetchTracksInternal($accessToken, $ownerName, $id, $whereYearIn, $whereAnyArtistIn, $whereAnyArtistNotIn, $whereAllArtistsIn, $whereAllArtistsNotIn, true);
+	}
+
+	/**
 	 * Fetches a list of tracks from the specified playlist
 	 *
 	 * @param string $accessToken the “Access Token” for access to the API
