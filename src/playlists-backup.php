@@ -20,7 +20,7 @@ require_once __DIR__ . '/Storage.php';
 
 \define('CONFIG_PATH_RELATIVE', '../data/config.json');
 \define('DATABASE_PATH_RELATIVE', '../data/database.json');
-\define('SPOTIFY_API_SCOPES', [ 'playlist-modify-private', 'user-library-read' ]);
+\define('SPOTIFY_API_SCOPES', [ 'playlist-read-private', 'user-library-read' ]);
 \define('SPOTIFY_URI_PLAYLIST_REGEX', '/^spotify:user:([^:]+):playlist:([^:]+)$/');
 \define('SAVED_TRACKS_PSEUDO_PLAYLIST_URI', 'me:tracks');
 \define('BACKUPS_DIRECTORY_PATH_RELATIVE', '../backups');
