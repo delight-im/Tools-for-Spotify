@@ -29,17 +29,17 @@ final class Storage {
 					}
 
 					if (!isset($data['api']['clientId'])) {
-						echo 'Starting ...' . "\n";
-						echo ' * Missing API client ID in configuration ...' . "\n";
-						echo ' * Cancelling ...' . "\n";
+						echo 'Starting …' . "\n";
+						echo ' * Missing API client ID in configuration …' . "\n";
+						echo ' * Cancelling …' . "\n";
 						echo 'Failed' . "\n";
 						exit(11);
 					}
 
 					if (!isset($data['api']['clientSecret'])) {
-						echo 'Starting ...' . "\n";
-						echo ' * Missing API client secret in configuration ...' . "\n";
-						echo ' * Cancelling ...' . "\n";
+						echo 'Starting …' . "\n";
+						echo ' * Missing API client secret in configuration …' . "\n";
+						echo ' * Cancelling …' . "\n";
 						echo 'Failed' . "\n";
 						exit(12);
 					}
@@ -59,25 +59,25 @@ final class Storage {
 					return $data;
 				}
 				else {
-					echo 'Starting ...' . "\n";
-					echo ' * Could not read configuration (“' . $pathRelative . '”) ...' . "\n";
-					echo ' * Cancelling ...' . "\n";
+					echo 'Starting …' . "\n";
+					echo ' * Could not read configuration (“' . $pathRelative . '”) …' . "\n";
+					echo ' * Cancelling …' . "\n";
 					echo 'Failed' . "\n";
 					exit(5);
 				}
 			}
 			else {
-				echo 'Starting ...' . "\n";
-				echo ' * Could not open configuration (“' . $pathRelative . '”) ...' . "\n";
-				echo ' * Cancelling ...' . "\n";
+				echo 'Starting …' . "\n";
+				echo ' * Could not open configuration (“' . $pathRelative . '”) …' . "\n";
+				echo ' * Cancelling …' . "\n";
 				echo 'Failed' . "\n";
 				exit(4);
 			}
 		}
 		else {
-			echo 'Starting ...' . "\n";
-			echo ' * Could not find configuration (“' . $pathRelative . '”) ...' . "\n";
-			echo ' * Cancelling ...' . "\n";
+			echo 'Starting …' . "\n";
+			echo ' * Could not find configuration (“' . $pathRelative . '”) …' . "\n";
+			echo ' * Cancelling …' . "\n";
 			echo 'Failed' . "\n";
 			exit(3);
 		}
@@ -98,9 +98,9 @@ final class Storage {
 					$json = @\file_get_contents($path, false);
 
 					if ($json === false) {
-						echo 'Starting ...' . "\n";
-						echo ' * Could not read database (“' . $pathRelative . '”) ...' . "\n";
-						echo ' * Cancelling ...' . "\n";
+						echo 'Starting …' . "\n";
+						echo ' * Could not read database (“' . $pathRelative . '”) …' . "\n";
+						echo ' * Cancelling …' . "\n";
 						echo 'Failed' . "\n";
 						exit(9);
 					}
@@ -123,25 +123,25 @@ final class Storage {
 					}
 				}
 				else {
-					echo 'Starting ...' . "\n";
-					echo ' * Could not modify database (“' . $pathRelative . '”) ...' . "\n";
-					echo ' * Cancelling ...' . "\n";
+					echo 'Starting …' . "\n";
+					echo ' * Could not modify database (“' . $pathRelative . '”) …' . "\n";
+					echo ' * Cancelling …' . "\n";
 					echo 'Failed' . "\n";
 					exit(8);
 				}
 			}
 			else {
-				echo 'Starting ...' . "\n";
-				echo ' * Could not open database (“' . $pathRelative . '”) ...' . "\n";
-				echo ' * Cancelling ...' . "\n";
+				echo 'Starting …' . "\n";
+				echo ' * Could not open database (“' . $pathRelative . '”) …' . "\n";
+				echo ' * Cancelling …' . "\n";
 				echo 'Failed' . "\n";
 				exit(7);
 			}
 		}
 		else {
-			echo 'Starting ...' . "\n";
-			echo ' * Could not find database (“' . $pathRelative . '”) ...' . "\n";
-			echo ' * Cancelling ...' . "\n";
+			echo 'Starting …' . "\n";
+			echo ' * Could not find database (“' . $pathRelative . '”) …' . "\n";
+			echo ' * Cancelling …' . "\n";
 			echo 'Failed' . "\n";
 			exit(6);
 		}

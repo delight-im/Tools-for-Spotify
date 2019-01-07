@@ -29,14 +29,14 @@ $config = \Storage::readConfiguration(\CONFIG_PATH_RELATIVE);
 $database = \Storage::readDatabase(\DATABASE_PATH_RELATIVE);
 
 if (isset($_GET['code'])) {
-	echo 'Starting ...' . "\n";
+	echo 'Starting …' . "\n";
 
 	$requestStartTime = \time();
 	$responseJson = \Spotify::fetchAccessToken($config['api']['clientId'], $config['api']['clientSecret'], $_GET['code']);
 
 	if ($responseJson === false) {
-		echo ' * Could not get an access token from the Spotify API ...' . "\n";
-		echo ' * Cancelling ...' . "\n";
+		echo ' * Could not get an access token from the Spotify API …' . "\n";
+		echo ' * Cancelling …' . "\n";
 		echo 'Failed' . "\n";
 		exit(2);
 	}
@@ -51,7 +51,7 @@ if (isset($_GET['code'])) {
 
 		foreach ($config['playlists']['sync']['oneWay'] as $oneWaySync) {
 			if (isset($oneWaySync['from']) && isset($oneWaySync['to'])) {
-				echo '   * From “' . (!empty($oneWaySync['fromName']) ? $oneWaySync['fromName'] : $oneWaySync['from']) . '” to “' . (!empty($oneWaySync['toName']) ? $oneWaySync['toName'] : $oneWaySync['to']) . '” ...' . "\n";
+				echo '   * From “' . (!empty($oneWaySync['fromName']) ? $oneWaySync['fromName'] : $oneWaySync['from']) . '” to “' . (!empty($oneWaySync['toName']) ? $oneWaySync['toName'] : $oneWaySync['to']) . '” …' . "\n";
 
 				$whereYearIn = (isset($oneWaySync['whereYearIn']) && \is_array($oneWaySync['whereYearIn']) && !empty($oneWaySync['whereYearIn'])) ? $oneWaySync['whereYearIn'] : null;
 				$whereAnyArtistIn = (isset($oneWaySync['whereAnyArtistIn']) && \is_array($oneWaySync['whereAnyArtistIn']) && !empty($oneWaySync['whereAnyArtistIn'])) ? $oneWaySync['whereAnyArtistIn'] : null;
@@ -104,34 +104,34 @@ if (isset($_GET['code'])) {
 										$trackUris
 									);
 
-									echo '     * Added ' . \count($trackUris) . ' tracks to playlist ...' . "\n";
+									echo '     * Added ' . \count($trackUris) . ' tracks to playlist …' . "\n";
 								}
 								else {
-									echo '     * Could not save tracks to playlist ...' . "\n";
-									echo '     * Skipping ...' . "\n";
+									echo '     * Could not save tracks to playlist …' . "\n";
+									echo '     * Skipping …' . "\n";
 								}
 							}
 							else {
-								echo '     * Already up to date ...' . "\n";
+								echo '     * Already up to date …' . "\n";
 							}
 						}
 						else {
-							echo '     * Could not fetch tracks from playlist ...' . "\n";
-							echo '     * Skipping ...' . "\n";
+							echo '     * Could not fetch tracks from playlist …' . "\n";
+							echo '     * Skipping …' . "\n";
 						}
 					}
 					else {
-						echo '     * Invalid “to” URI ...' . "\n";
-						echo '     * Skipping ...' . "\n";
+						echo '     * Invalid “to” URI …' . "\n";
+						echo '     * Skipping …' . "\n";
 					}
 				}
 				else {
-					echo '     * Invalid “from” URI ...' . "\n";
-					echo '     * Skipping ...' . "\n";
+					echo '     * Invalid “from” URI …' . "\n";
+					echo '     * Skipping …' . "\n";
 				}
 			}
 			else {
-				echo '   * Skipping invalid playlist entry ...' . "\n";
+				echo '   * Skipping invalid playlist entry …' . "\n";
 			}
 		}
 
@@ -139,16 +139,16 @@ if (isset($_GET['code'])) {
 			echo 'Succeeded' . "\n";
 		}
 		else {
-			echo ' * Could not update information in database ...' . "\n";
+			echo ' * Could not update information in database …' . "\n";
 			echo 'Failed' . "\n";
 			exit(10);
 		}
 	}
 }
 elseif (isset($_GET['error'])) {
-	echo 'Starting ...' . "\n";
-	echo ' * You have denied the authorization request with the Spotify API' . "\n";
-	echo ' * Cancelling ...' . "\n";
+	echo 'Starting …' . "\n";
+	echo ' * You have denied the authorization request with the Spotify API …' . "\n";
+	echo ' * Cancelling …' . "\n";
 	echo 'Failed' . "\n";
 	exit(1);
 }
