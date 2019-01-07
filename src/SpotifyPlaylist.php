@@ -247,4 +247,80 @@ final class SpotifyPlaylist {
 		}
 	}
 
+	/**
+	 * Deletes a list of tracks from the specified playlist
+	 *
+	 * Each track must have the three properties `id`, `uri` and `position`
+	 *
+	 * @param string $accessToken the “Access Token” for access to the API
+	 * @param string $ownerName the name of the playlist's owner
+	 * @param string $id the ID of the playlist
+	 * @param array $tracks the list of tracks to remove
+	 * @param int|null $offset (optional) the offset within the list of tracks
+	 * @return bool whether the tracks could be deleted from the playlist
+	 */
+	private static function deleteTracks($accessToken, $ownerName, $id, array $tracks, $offset = null) {
+		$offset = isset($offset) ? (int) $offset : 0;
+
+		if (isset($ownerName) && isset($id)) {
+			$limit = 100;
+
+			\usort($tracks, function ($a, $b) {
+				return ($a['position'] === $b['position'] ? 0 : ($a['position'] < $b['position'] ? -1 : 1));
+			});
+		}
+		else {
+			$limit = 50;
+		}
+
+		$batch = \array_slice($tracks, $offset, $limit);
+
+		if (isset($ownerName) && isset($id)) {
+			$batch = \array_map(function ($each) use ($offset) {
+				unset($each['id']);
+
+				$each['positions'] = [
+					$each['position'] - $offset
+				];
+
+				unset($each['position']);
+
+				return $each;
+			}, $batch);
+
+			$apiUrl = 'https://api.spotify.com/v1/users/' . \urlencode($ownerName) . '/playlists/' . \urlencode($id) . '/tracks';
+			$requestBody = [ 'tracks' => $batch ];
+		}
+		else {
+			$batch = \array_map(function ($each) {
+				return $each['id'];
+			}, $batch);
+
+			$apiUrl = 'https://api.spotify.com/v1/me/tracks';
+			$requestBody = $batch;
+		}
+
+		$responseJson = \Http::makeRequest(
+			'DELETE',
+			$apiUrl,
+			[
+				'Authorization: Bearer ' . $accessToken,
+				'Content-Type: application/json'
+			],
+			\json_encode($requestBody)
+		);
+
+		if ($responseJson !== false) {
+			if (($offset + $limit) < \count($tracks)) {
+				return self::deleteTracks($accessToken, $ownerName, $id, $tracks, $offset + $limit);
+			}
+			else {
+				return true;
+			}
+		}
+		else {
+			return false;
+		}
+	}
+
 }
