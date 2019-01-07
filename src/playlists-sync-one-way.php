@@ -53,7 +53,9 @@ if (isset($_GET['code'])) {
 			if (isset($oneWaySync['from']) && isset($oneWaySync['to'])) {
 				echo '   * From “' . (!empty($oneWaySync['fromName']) ? $oneWaySync['fromName'] : $oneWaySync['from']) . '” to “' . (!empty($oneWaySync['toName']) ? $oneWaySync['toName'] : $oneWaySync['to']) . '” …' . "\n";
 
-				$whereYearIn = (isset($oneWaySync['whereYearIn']) && \is_array($oneWaySync['whereYearIn']) && !empty($oneWaySync['whereYearIn'])) ? $oneWaySync['whereYearIn'] : null;
+				// TODO: drop support for `filterByYear` alias in next major version
+				$whereYearIn = (isset($oneWaySync['whereYearIn']) && \is_array($oneWaySync['whereYearIn']) && !empty($oneWaySync['whereYearIn'])) ? $oneWaySync['whereYearIn'] : ((isset($oneWaySync['filterByYear']) && \is_array($oneWaySync['filterByYear']) && !empty($oneWaySync['filterByYear'])) ? $oneWaySync['filterByYear'] : null);
+
 				$whereAnyArtistIn = (isset($oneWaySync['whereAnyArtistIn']) && \is_array($oneWaySync['whereAnyArtistIn']) && !empty($oneWaySync['whereAnyArtistIn'])) ? $oneWaySync['whereAnyArtistIn'] : null;
 				$whereAnyArtistNotIn = (isset($oneWaySync['whereAnyArtistNotIn']) && \is_array($oneWaySync['whereAnyArtistNotIn']) && !empty($oneWaySync['whereAnyArtistNotIn'])) ? $oneWaySync['whereAnyArtistNotIn'] : null;
 				$whereAllArtistsIn = (isset($oneWaySync['whereAllArtistsIn']) && \is_array($oneWaySync['whereAllArtistsIn']) && !empty($oneWaySync['whereAllArtistsIn'])) ? $oneWaySync['whereAllArtistsIn'] : null;
