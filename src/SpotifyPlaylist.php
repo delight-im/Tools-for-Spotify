@@ -86,6 +86,54 @@ final class SpotifyPlaylist {
 	}
 
 	/**
+	 * Clears the specified playlist
+	 *
+	 * @param string $accessToken the “Access Token” for access to the API
+	 * @param string $ownerName the name of the playlist's owner
+	 * @param string $id the ID of the playlist
+	 * @return int|null the number of removed tracks, or `null` on failure
+	 */
+	public static function clear($accessToken, $ownerName, $id) {
+		$tracks = self::fetchTracks($accessToken, $ownerName, $id);
+
+		if ($tracks !== null) {
+			if (!empty($tracks)) {
+				$remove = [];
+
+				foreach ($tracks as $trackPosition => $trackData) {
+					if (empty($trackData['track']['id']) || empty($trackData['track']['uri'])) {
+						return null;
+					}
+
+					$remove[] = [
+						'id' => (string) $trackData['track']['id'],
+						'uri' => (string) $trackData['track']['uri'],
+						'position' => (int) $trackPosition
+					];
+				}
+
+				if (!empty($remove)) {
+					if (self::deleteTracks($accessToken, $ownerName, $id, $remove)) {
+						return \count($remove);
+					}
+					else {
+						return null;
+					}
+				}
+				else {
+					return 0;
+				}
+			}
+			else {
+				return 0;
+			}
+		}
+		else {
+			return null;
+		}
+	}
+
+	/**
 	 * Fetches a list of tracks from the specified playlist
 	 *
 	 * @param string $accessToken the “Access Token” for access to the API
