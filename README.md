@@ -25,6 +25,7 @@ Tools and utilities for Spotify using the Spotify Web API
        ```
        http://localhost/Tools-for-Spotify/src/playlists-sync-one-way.php
        http://localhost/Tools-for-Spotify/src/playlists-backup.php
+       http://localhost/Tools-for-Spotify/src/playlists-deduplicate.php
        http://localhost/Tools-for-Spotify/src/playlists-clear.php
        ```
 
@@ -151,6 +152,28 @@ Tools and utilities for Spotify using the Spotify Web API
 
     ```
     http://localhost/Tools-for-Spotify/src/playlists-backup.php
+    ```
+
+### Deduplicating playlists
+
+ 1. Define your desired targets in `data/config.json`, e.g. like this:
+
+    ```json
+    {
+        "playlists": {
+            "deduplicate": [
+                {
+                    "which": "spotify:user:obhqrwlenifzujsdkvtcpa:playlist:phmcblzvgwdisqyfakrenx"
+                }
+            ]
+        }
+    }
+    ```
+
+ 1. Navigate your browser to
+
+    ```
+    http://localhost/Tools-for-Spotify/src/playlists-deduplicate.php
     ```
 
 ### Clearing playlists
