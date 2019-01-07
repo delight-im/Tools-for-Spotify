@@ -86,6 +86,101 @@ final class SpotifyPlaylist {
 	}
 
 	/**
+	 * Deduplicates the specified playlist
+	 *
+	 * @param string $accessToken the “Access Token” for access to the API
+	 * @param string $ownerName the name of the playlist's owner
+	 * @param string $id the ID of the playlist
+	 * @return int|null the number of removed tracks, or `null` on failure
+	 */
+	public static function deduplicate($accessToken, $ownerName, $id) {
+		$tracks = self::fetchTracks($accessToken, $ownerName, $id);
+
+		if ($tracks !== null) {
+			if (!empty($tracks)) {
+				\uasort($tracks, function ($a, $b) {
+					$a = isset($a['track']['album']['release_date']) ? (string) $a['track']['album']['release_date'] : '';
+					$a .= \substr('9999-07-02', \strlen($a));
+
+					$b = isset($b['track']['album']['release_date']) ? (string) $b['track']['album']['release_date'] : '';
+					$b .= \substr('9999-07-02', \strlen($b));
+
+					return \strcmp($a, $b);
+				});
+
+				$seen = [];
+				$remove = [];
+
+				foreach ($tracks as $trackPosition => $trackData) {
+					if (empty($trackData['track']['id']) || empty($trackData['track']['uri']) || empty($trackData['track']['artists']) || empty($trackData['track']['name'])) {
+						continue;
+					}
+
+					$keyComponentsSeparator = ':';
+					$keyComponents = [];
+
+					$artistNamesSeparator = ';';
+					$artistNames = \array_map(
+						function ($artist) use ($artistNamesSeparator) {
+							$artist['name'] = \trim($artist['name']);
+							$artist['name'] = \strtolower($artist['name']);
+							$artist['name'] = \str_replace($artistNamesSeparator, '\\' . $artistNamesSeparator, $artist['name']);
+
+							return $artist['name'];
+						},
+						$trackData['track']['artists']
+					);
+
+					\sort($artistNames);
+
+					$artists = \implode($artistNamesSeparator, $artistNames);
+					$keyComponents[] = \str_replace($keyComponentsSeparator, '\\' . $keyComponentsSeparator, $artists);
+
+					$title = \strtolower($trackData['track']['name']);
+					$keyComponents[] = \str_replace($keyComponentsSeparator, '\\' . $keyComponentsSeparator, $title);
+
+					$isrc = !empty($trackData['track']['external_ids']['isrc']) ? (string) $trackData['track']['external_ids']['isrc'] : '';
+					$keyComponents[] = \str_replace($keyComponentsSeparator, '\\' . $keyComponentsSeparator, $isrc);
+
+					$duration = !empty($trackData['track']['duration_ms']) ? (int) ($trackData['track']['duration_ms'] / 1000 / 10) : 0;
+					$keyComponents[] = \str_replace($keyComponentsSeparator, '\\' . $keyComponentsSeparator, $duration);
+
+					$key = \implode($keyComponentsSeparator, $keyComponents);
+
+					if (isset($seen[$key])) {
+						$remove[] = [
+							'id' => (string) $trackData['track']['id'],
+							'uri' => (string) $trackData['track']['uri'],
+							'position' => (int) $trackPosition
+						];
+					}
+					else {
+						$seen[$key] = true;
+					}
+				}
+
+				if (!empty($remove)) {
+					if (self::deleteTracks($accessToken, $ownerName, $id, $remove)) {
+						return \count($remove);
+					}
+					else {
+						return null;
+					}
+				}
+				else {
+					return 0;
+				}
+			}
+			else {
+				return 0;
+			}
+		}
+		else {
+			return null;
+		}
+	}
+
+	/**
 	 * Clears the specified playlist
 	 *
 	 * @param string $accessToken the “Access Token” for access to the API
